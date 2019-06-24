@@ -1,17 +1,17 @@
 from lxml import etree as ET
 import dateutil.parser
-#import xml.etree.ElementTree as ET
+# import xml.etree.ElementTree as ET
 import os
 import requests
 import unidecode
 import datetime
 import re
-#import pytz
+# import pytz
 import time
 import codecs
 import csv
 from extractlinks import extractlinks
-
+import wget
 DEBUG = False
 
 
@@ -102,26 +102,15 @@ TAG_RE = re.compile(r'<[^>]+>')
 def remove_tags(text, links):
     # print(text)
     for l in links:
-        # print(l)
-        searchText = "<a.*" + re.escape(l[1]) + ".*>.*<img.*>.*</a>"
-        # print(searchText)
-        text = re.sub(searchText, "[[" + l[1] + "]]", text)
-
-    # Split and filter out empty strings from array
-#  listOfPosts = list(filter(None, TAG_RE.split(text)))
- #   for idx in range(len(listOfPosts)):
-   #     # or l in listOfPosts:
-  #      if listOfPosts[idx][0] is "\"":
-     #       listOfPosts[idx] = listOfPosts[idx][1:]
-    #    if listOfPosts[idx][-1] is "\"":
-      #      listOfPosts[idx] = listOfPosts[idx][:-1]
-     #   # print(l)
-     #   if listOfPosts[idx][-1] is "\n" or listOfPosts[idx][-1] is "\r":
-     #       listOfPosts[idx] = listOfPosts[idx][:-1]
-     #   # print(l)
-     #   #print(list(filter(None, l.split('\n\n'))))
-     #   listOfPosts[idx] = "".join(
-     #       list(filter(None, listOfPosts[idx].split('\n\n')))) """
+        print(l[0])
+        if l[0] is "a":
+            searchText = "<a.*" + re.escape(l[1]) + ".*>.*<img.*>.*</a>"
+        if l[0] is "img":
+            searchText = "<img.*"+re.escape(l[1])+".*>"
+        print(searchText)
+        head, tail = os.path.split(l[1])
+        # print(tail)
+        text = re.sub(searchText, "[[" + tail + "]]", text)
     return text
 
 
@@ -138,11 +127,19 @@ def get_posts(xmlfile):
         post.url = post_elem.find("./link").text
         post.body = post_elem.find(
             "./content:encoded", namespaces=namespaces).text.replace("\"\"", "\"")
-        # print(post.body)
+        #print(post.body)
         post.post_date = dateutil.parser.parse(post_elem.find(
             "./wp:post_date", namespaces=namespaces).text)
-        #print("EXTRACTING LINKS!")
+        # print("EXTRACTING LINKS!")
         post.links = extractlinks(post.body)
+        #print(post.links)
+        for imgl in post.links:
+            head, tail = os.path.split(imgl[1])
+            print(tail)
+            if not os.path.isfile("./imgs/" + tail):
+                
+                wget.download(imgl[1], "./imgs/" + tail)
+
         # print(post.links)
         post.body = remove_tags(post.body, post.links)
         # print(post.body)
@@ -157,11 +154,5 @@ posts = get_posts(
 for post in posts:
     # print("==================")
     with open("./out/"+post.post_date.strftime("%Y-%m-%d_%H-%M-%S") + ".csv", mode='w', encoding='utf-8') as post_file:
-        post_writer = csv.writer(
-            post_file, delimiter='|', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-
-        entries = [post.post_date.strftime(
-            "%Y-%m-%d_%H-%M-%S"), post.title]
-        entries.extend([post.body])
-        # print(entries)
-        post_writer.writerow(entries)
+        post_file.write(post.post_date.strftime(
+            "%Y-%m-%d_%H-%M-%S") + "|" + post.title + "|" +post.body)

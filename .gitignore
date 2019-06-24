@@ -1,3 +1,5 @@
 
 *.csv
 *.iml
+/pythonScript/imgs
+/pythonScript/out
