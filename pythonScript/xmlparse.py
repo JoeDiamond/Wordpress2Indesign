@@ -100,25 +100,29 @@ TAG_RE = re.compile(r'<[^>]+>')
 
 
 def remove_tags(text, links):
-    # return TAG_RE.sub('', text)
+    # print(text)
+    for l in links:
+        # print(l)
+        searchText = "<a.*" + re.escape(l[1]) + ".*>.*<img.*>.*</a>"
+        # print(searchText)
+        text = re.sub(searchText, "[[" + l[1] + "]]", text)
+
     # Split and filter out empty strings from array
-    word_or_plural = re.escape(word) + 's?'
-    return re.match(word_or_plural, text)
-    listOfPosts = list(filter(None, TAG_RE.split(text)))
-    for idx in range(len(listOfPosts)):
-        # or l in listOfPosts:
-        if listOfPosts[idx][0] is "\"":
-            listOfPosts[idx] = listOfPosts[idx][1:]
-        if listOfPosts[idx][-1] is "\"":
-            listOfPosts[idx] = listOfPosts[idx][:-1]
-        # print(l)
-        if listOfPosts[idx][-1] is "\n" or listOfPosts[idx][-1] is "\r":
-            listOfPosts[idx] = listOfPosts[idx][:-1]
-        # print(l)
-        #print(list(filter(None, l.split('\n\n'))))
-        listOfPosts[idx] = "".join(
-            list(filter(None, listOfPosts[idx].split('\n\n'))))
-    return listOfPosts
+#  listOfPosts = list(filter(None, TAG_RE.split(text)))
+ #   for idx in range(len(listOfPosts)):
+   #     # or l in listOfPosts:
+  #      if listOfPosts[idx][0] is "\"":
+     #       listOfPosts[idx] = listOfPosts[idx][1:]
+    #    if listOfPosts[idx][-1] is "\"":
+      #      listOfPosts[idx] = listOfPosts[idx][:-1]
+     #   # print(l)
+     #   if listOfPosts[idx][-1] is "\n" or listOfPosts[idx][-1] is "\r":
+     #       listOfPosts[idx] = listOfPosts[idx][:-1]
+     #   # print(l)
+     #   #print(list(filter(None, l.split('\n\n'))))
+     #   listOfPosts[idx] = "".join(
+     #       list(filter(None, listOfPosts[idx].split('\n\n')))) """
+    return text
 
 
 def get_posts(xmlfile):
@@ -128,17 +132,20 @@ def get_posts(xmlfile):
     posts = []
     # Get all the posts
     for post_elem in tree.xpath(".//item[wp:post_type='post']", namespaces=namespaces):
+        print("=====================================================================")
         post = Post(post_elem.find("./wp:post_id",
                                    namespaces=namespaces).text, post_elem.find("./title").text)
         post.url = post_elem.find("./link").text
         post.body = post_elem.find(
             "./content:encoded", namespaces=namespaces).text.replace("\"\"", "\"")
+        # print(post.body)
         post.post_date = dateutil.parser.parse(post_elem.find(
             "./wp:post_date", namespaces=namespaces).text)
+        #print("EXTRACTING LINKS!")
         post.links = extractlinks(post.body)
-        print(post.links)
-        post.body = remove_tags(post.body)
-        print(post.body)
+        # print(post.links)
+        post.body = remove_tags(post.body, post.links)
+        # print(post.body)
         posts.append(post)
     return posts
 
@@ -155,6 +162,6 @@ for post in posts:
 
         entries = [post.post_date.strftime(
             "%Y-%m-%d_%H-%M-%S"), post.title]
-        entries.extend(post.body)
+        entries.extend([post.body])
         # print(entries)
         post_writer.writerow(entries)

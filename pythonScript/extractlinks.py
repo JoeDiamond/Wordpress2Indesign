@@ -21,10 +21,10 @@ class MyHTMLParser(HTMLParser):
             attr = dict(attrs)
             if self.linkfound:
                 
-                self.links.append({"a": self.linkattr["href"]})
+                self.links.append(["a", self.linkattr["href"]])
             else:
                 
-                self.links.append({"img": attr["src"]})
+                self.links.append(["img", attr["src"]])
             self.linkfound = False
         #print(self.links)
 
@@ -37,9 +37,7 @@ class MyHTMLParser(HTMLParser):
 
 def extractlinks(htmlstr):
     parser = MyHTMLParser()
+    parser.links = []
+    #print("PARSING:" + htmlstr)
     parser.feed(htmlstr)
     return parser.links
-
-
-if __name__ == '__main__':
-    extractlinks(sys.argv[1])
