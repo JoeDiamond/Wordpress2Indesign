@@ -12,6 +12,7 @@ import codecs
 import csv
 from extractlinks import extractlinks
 import wget
+from PIL import Image
 DEBUG = False
 
 
@@ -52,62 +53,17 @@ class Post:
         self.categories = []
         self.comments = []
 
-    def adjust_paths(self, attachments=None, prefix=''):
-        if prefix is not '' and not prefix.endswith('/'):
-            print("[ERRR] Your attachment prefix does not end in a trailing slash")
-            return False
-        if self.body is not None and attachments is not None:
-            for attachment in attachments:
-                if attachment.url in self.body:
-                    new_url = prefix + attachment.url.split('/')[-1]
-                    self.body = self.body.replace(attachment.url, new_url)
-                    if DEBUG:
-                        print("[DEBG] Replaced " +
-                              attachment.url + " with " + new_url)
-
-    def fix_paragraphs(self):
-        fixed = self.body.replace('\n', '</p><p>')
-        fixed = '<p>' + fixed + '</p>'
-        fixed = fixed.replace('</p><p></p><p>', '</p><p>')
-        self.body = fixed
-
-    def fix_more(self):
-        fixed = self.body.replace('<!--more-->', '[[MORE]]')
-        self.body = fixed
-
-
-class Attachment:
-    def __init__(self, id=None, title=None, url=None):
-        self.id = id
-        self.title = title
-        self.url = url
-
-    def download(self, path='attachments'):
-        if self.url is not None:
-            title = self.url.split('/')[-1]
-            attachment = requests.get(self.url)
-            if attachment.status_code == requests.codes.ok:
-                f = open(os.path.join(path, title), 'wb')
-                f.write(attachment.content)
-                f.close()
-            else:
-                attachment.raise_for_status()
-
-
-# Regular Expression to remove html tags from a string. It is assumed that the tags
-# are well formed, i.e. there are no opening without closing angular parenthesis
-TAG_RE = re.compile(r'<[^>]+>')
-
+   
 
 def remove_tags(text, links):
     # print(text)
     for l in links:
-        print(l[0])
+        #print(l[0])
         if l[0] is "a":
             searchText = "<a.*" + re.escape(l[1]) + ".*>.*<img.*>.*</a>"
         if l[0] is "img":
             searchText = "<img.*"+re.escape(l[1])+".*>"
-        print(searchText)
+        #print(searchText)
         head, tail = os.path.split(l[1])
         # print(tail)
         text = re.sub(searchText, "[[" + tail + "]]", text)
@@ -135,10 +91,17 @@ def get_posts(xmlfile):
         #print(post.links)
         for imgl in post.links:
             head, tail = os.path.split(imgl[1])
-            print(tail)
-            if not os.path.isfile("./imgs/" + tail):
-                
-                wget.download(imgl[1], "./imgs/" + tail)
+            #print(tail)
+            targetPath = "./imgs/" + tail
+            targetThumbPath = "./imgs/" + os.path.splitext(tail)[0] + "_thumb.jpg"
+            print(targetThumbPath + "\r")
+            if not os.path.isfile(targetPath):
+                wget.download(imgl[1], targetPath)
+            if not os.path.isfile(targetThumbPath):
+                im = Image.open(targetPath)
+                im.convert('RGB')
+                im.thumbnail((1200, 1200), Image.ANTIALIAS)
+                im.save(targetThumbPath, 'JPEG', quality=80)
 
         # print(post.links)
         post.body = remove_tags(post.body, post.links)

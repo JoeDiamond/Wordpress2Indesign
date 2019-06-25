@@ -43,7 +43,7 @@ with (myDocument) {
                     // Trim to get the filename
                     linkname = myFoundItems[0].contents.substring(2, myFoundItems[0].contents.length - 2)
 
-                    var rect = myFoundItems[0].insertionPoints[0].rectangles.add({ geometricBounds: [0, 0, 40, 90], strokeWeight: 0 });
+                    var rect = myFoundItems[0].insertionPoints[0].rectangles.add({ geometricBounds: [0, 0, 40, myTextFrame.textFramePreferences.textColumnFixedWidth], strokeWeight: 0 });
                     rect.place(new File("/C/Users/Joe/Documents/WordpressConversion/pythonScript/imgs/" + linkname));
                     rect.fit(FitOptions.PROPORTIONALLY);
                     myFoundItems[0].remove()
