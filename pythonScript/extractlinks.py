@@ -19,6 +19,7 @@ class MyHTMLParser(HTMLParser):
         if tag == 'img':
             #print("Found img tag")
             attr = dict(attrs)
+            #print(attr)
             if self.linkfound:
                 
                 self.links.append(["a", self.linkattr["href"]])
@@ -33,6 +34,7 @@ class MyHTMLParser(HTMLParser):
             return
         if tag == 'a':
             self.linkfound = False
+        
 
 
 def extractlinks(htmlstr):

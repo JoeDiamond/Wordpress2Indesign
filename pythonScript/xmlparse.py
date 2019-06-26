@@ -14,7 +14,7 @@ from extractlinks import extractlinks
 import wget
 from PIL import Image
 DEBUG = False
-
+import logging
 
 def slugify(string):
     if string is not None:
@@ -75,17 +75,21 @@ def get_posts(xmlfile):
     # 'C:\\Users\\Joe\\Downloads\\luegmairblog.wordpress.2019-06-16_changed.xml'
     namespaces = tree.getroot().nsmap
     posts = []
+    errorfile = open("./logs/errors.log", mode='w', encoding='utf-8')
     # Get all the posts
     for post_elem in tree.xpath(".//item[wp:post_type='post']", namespaces=namespaces):
         print("=====================================================================")
+        
         post = Post(post_elem.find("./wp:post_id",
                                    namespaces=namespaces).text, post_elem.find("./title").text)
         post.url = post_elem.find("./link").text
         post.body = post_elem.find(
-            "./content:encoded", namespaces=namespaces).text.replace("\"\"", "\"")
+            "./content:encoded", namespaces=namespaces).text
+            #.replace("\"\"", "\"")
         #print(post.body)
         post.post_date = dateutil.parser.parse(post_elem.find(
             "./wp:post_date", namespaces=namespaces).text)
+        print(post.post_date)
         # print("EXTRACTING LINKS!")
         post.links = extractlinks(post.body)
         #print(post.links)
@@ -94,10 +98,16 @@ def get_posts(xmlfile):
             #print(tail)
             targetPath = "./imgs/" + tail
             targetThumbPath = "./imgs/" + os.path.splitext(tail)[0] + "_thumb.jpg"
-            print(targetThumbPath + "\r")
+            #print(targetThumbPath + "\r")
             if not os.path.isfile(targetPath):
-                wget.download(imgl[1], targetPath)
-            if not os.path.isfile(targetThumbPath):
+                try:
+                    print(imgl[1] + ": ")
+                    wget.download(imgl[1], targetPath)
+                except:
+                    print("Error downloading\r")
+                    errorfile.write(imgl[1]+"\r")
+                print("\r")
+            if not os.path.isfile(targetThumbPath) and os.path.isfile(targetPath):
                 im = Image.open(targetPath)
                 im.convert('RGB')
                 im.thumbnail((1200, 1200), Image.ANTIALIAS)
@@ -106,13 +116,18 @@ def get_posts(xmlfile):
         # print(post.links)
         post.body = remove_tags(post.body, post.links)
         # print(post.body)
+
+        with open("./out/"+post.post_date.strftime("%Y-%m-%d_%H-%M-%S") + ".csv", mode='w', encoding='utf-8') as post_file:
+            post_file.write(post.post_date.strftime(
+            "%Y-%m-%d_%H-%M-%S") + "|" + post.title + "|" + post.body)
         posts.append(post)
+    errorfile.close()
     return posts
 
 
 # run when called from command line
 posts = get_posts(
-    'C:\\Users\\Joe\\Downloads\\luegmairblog.wordpress.2019-06-16_changed.xml')
+    'C:\\Users\\Joe\\Downloads\\luegmairblog.wordpress.2019-06-26(3).xml')
 
 for post in posts:
     # print("==================")
