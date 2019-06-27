@@ -21,7 +21,6 @@ class MyHTMLParser(HTMLParser):
             attr = dict(attrs)
             #print(attr)
             if self.linkfound:
-                
                 self.links.append(["a", self.linkattr["href"]])
             else:
                 
