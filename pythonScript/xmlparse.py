@@ -111,6 +111,8 @@ def get_posts(xmlfile):
                 print("\r")
             if not os.path.isfile(targetThumbPath) and os.path.isfile(targetPath):
                 im = Image.open(targetPath)
+                if(os.path.splitext(targetPath) is "gif" and im.is_animated):
+                    im.seek(0)
                 im.convert('RGB')
                 im.thumbnail((1200, 1200), Image.ANTIALIAS)
                 im.save(targetThumbPath, 'JPEG', quality=80)

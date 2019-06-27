@@ -4,8 +4,9 @@ var myDocument;
 app.documentPresets[0].createPrimaryTextFrame = true;
 
 if (app.documents.length == 0) {
-    myDocument = app.documents.add({ 
-        pageOrientation: PageOrientation.landscape });
+    myDocument = app.documents.add({
+        pageOrientation: PageOrientation.landscape
+    });
 }
 else {
     myDocument = app.documents[0];
@@ -20,14 +21,14 @@ with (myDocument.masterSpreads[0]) {
     with (pages[0]) {
         with (textFrames[0]) {
             textFramePreferences.textColumnCount = 3,
-                geometricBounds = ["10mm", "10mm", "200mm", "280mm"];
+                geometricBounds = ["10mm", "13.5mm", "200mm", "283.5mm"];
         }
 
     }
     with (pages[1]) {
         with (textFrames[0]) {
             textFramePreferences.textColumnCount = 3,
-                geometricBounds = ["10mm", "10mm", "200mm", "280mm"];
+                geometricBounds = ["10mm", "13.5mm", "200mm", "283.5mm"];
         }
     }
 }
@@ -92,41 +93,44 @@ with (myDocument) {
                     }
                     catch (Error) {
                         ErrorOccurred = true;
-                        /*   if (Error.number == 11265) {
-                               ErrorOccurred = true;
-                           }
-                           else { throw Error; }*/
                     }
                     if (ErrorOccurred) {
                         myDocument.pages.add();
-                        var newTextFrame = myDocument.pages[-1].textFrames.add();
-                        newTextFrame.textFramePreferences.textColumnCount = 3;
-                        newTextFrame.geometricBounds = ["10mm", "10mm", "200mm", "280mm"];
-                        myDocument.pages[-2].textFrames[0].nextTextFrame = newTextFrame;
+                        myDocument.pages[-2].textFrames[0].nextTextFrame = myDocument.pages[-1].textFrames[0];
                         rect = myFoundItems[0].insertionPoints[0].rectangles.add({ geometricBounds: [0, 0, 40, myTextFrame.textFramePreferences.textColumnFixedWidth], strokeWeight: 0 });
                     }
                     // Check if the text frame has overflown
                     addAndLinkPageAndFrame(myDocument);
                     ErrorOccurred = false;
+                    var img;
                     try {
-                        rect.place(new File("/C/Users/Joe/Documents/WordpressConversion/pythonScript/imgs/" + linkname.replace(".", "_thumb.")));
+                        img = rect.place(new File("/C/Users/Joe/Documents/WordpressConversion/pythonScript/imgs/" + linkname.replace(".", "_thumb.")));
                     }
                     catch (Error) {
                         ErrorOccurred = true;
-                        /*  if (Error.number == 11265) {
-                              ErrorOccurred = true;
-                          }
-                          else { throw Error; }*/
                     }
                     if (ErrorOccurred) {
                         myDocument.pages.add();
-                        var newTextFrame = myDocument.pages[-1].textFrames.add();
-                        newTextFrame.textFramePreferences.textColumnCount = 3;
-                        newTextFrame.geometricBounds = ["10mm", "10mm", "200mm", "280mm"];
-                        myDocument.pages[-2].textFrames[0].nextTextFrame = newTextFrame;
-                        rect.place(new File("/C/Users/Joe/Documents/WordpressConversion/pythonScript/imgs/" + linkname));
+                        myDocument.pages[-2].textFrames[0].nextTextFrame = myDocument.pages[-1].textFrames[0];
+                        img = rect.place(new File("/C/Users/Joe/Documents/WordpressConversion/pythonScript/imgs/" + linkname));
                     }
                     rect.fit(FitOptions.PROPORTIONALLY);
+
+                    // Resize the rectangle, if the image is landscape
+                    if (img[0].geometricBounds[3] - img[0].geometricBounds[1] > img[0].geometricBounds[2] - img[0].geometricBounds[0]) {
+                        //Landscape image
+                        var h = (img[0].geometricBounds[2] - img[0].geometricBounds[0]) / (img[0].geometricBounds[3] - img[0].geometricBounds[1]) * myDocument.pages[-1].textFrames[0].textFramePreferences.textColumnFixedWidth;
+                        var myTopLeft = rect.resolve(AnchorPoint.TOP_LEFT_ANCHOR, CoordinateSpaces.INNER_COORDINATES)[0];
+                        var myBottomRight = rect.resolve(AnchorPoint.BOTTOM_RIGHT_ANCHOR, CoordinateSpaces.INNER_COORDINATES)[0];
+                        var x0 = myTopLeft[0];
+                        var y0 = myTopLeft[1];
+                        var x1 = myBottomRight[0];
+                        var y1 = myBottomRight[1] + h;
+                        rect.reframe(CoordinateSpaces.INNER_COORDINATES, [[x0, y0], [x1, y1]]);
+                        rect.fit(FitOptions.FILL_PROPORTIONALLY);
+                    }
+
+                    // Delete the found link
                     myFoundItems[0].remove()
 
                     // Check if the text frame has overflown
@@ -143,12 +147,8 @@ with (myDocument) {
 
 function addAndLinkPageAndFrame(myDocument) {
     var oldTextFrame = myDocument.textFrames[-1];
-
     if (oldTextFrame.overflows) {
         myDocument.pages.add(locationOptions = LocationOptions.AT_END);
-        var newTextFrame = myDocument.pages[-1].textFrames.add();
-        newTextFrame.textFramePreferences.textColumnCount = 3;
-        newTextFrame.geometricBounds = ["10mm", "10mm", "200mm", "280mm"];
-        oldTextFrame.nextTextFrame = newTextFrame;
+        oldTextFrame.nextTextFrame = myDocument.pages[-1].textFrames[0];
     }
 }
