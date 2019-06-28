@@ -111,6 +111,7 @@ def get_posts(xmlfile):
                 print("\r")
             if not os.path.isfile(targetThumbPath) and os.path.isfile(targetPath):
                 im = Image.open(targetPath)
+                # Handle the sporadic gif
                 if(os.path.splitext(targetPath) is "gif" and im.is_animated):
                     im.seek(0)
                 im.convert('RGB')

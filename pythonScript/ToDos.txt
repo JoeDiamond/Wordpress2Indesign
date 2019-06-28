@@ -1,4 +1,4 @@
-- Querformat Bilder sollen so breit wie eine Spalte sein
-- 5Doppelseiten an Rosa im InDesign-Format
-- Zielformat: 21x30 (DIN-A4-Landscape) mit 3 Spalten
-- Musterseite anlegen, alle anderen Seiten basieren darauf
+- Querformat Bilder sollen so breit wie eine Spalte sein DONE
+- 5Doppelseiten an Rosa im InDesign-Format DONE
+- Zielformat: 21x30 (DIN-A4-Landscape) mit 3 Spalten DONE
+- Musterseite anlegen, alle anderen Seiten basieren darauf DONE

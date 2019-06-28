@@ -1,6 +1,7 @@
 ﻿// Target InDesign CS6
 #target indesign-8.0
 var myDocument;
+var NoCols = 4;
 app.documentPresets[0].createPrimaryTextFrame = true;
 
 if (app.documents.length == 0) {
@@ -20,14 +21,14 @@ with (myDocument.documentPreferences) {
 with (myDocument.masterSpreads[0]) {
     with (pages[0]) {
         with (textFrames[0]) {
-            textFramePreferences.textColumnCount = 3,
+            textFramePreferences.textColumnCount = NoCols,
                 geometricBounds = ["10mm", "13.5mm", "200mm", "283.5mm"];
         }
 
     }
     with (pages[1]) {
         with (textFrames[0]) {
-            textFramePreferences.textColumnCount = 3,
+            textFramePreferences.textColumnCount = NoCols,
                 geometricBounds = ["10mm", "13.5mm", "200mm", "283.5mm"];
         }
     }
@@ -39,7 +40,7 @@ var foldercontent = csvfolder.getFiles("*.csv");
 
 // Define the paragraph styles
 try {
-    myDocument.paragraphStyles.add({ spaceBefore: "5mm", spaceAfter: "2mm", pointSize: "24pt", fontStyle: "Bold", appliedFont: "Arial", name: "StyleDailyHeader" });
+    myDocument.paragraphStyles.add({ spaceBefore: "5mm", spaceAfter: "2mm", pointSize: "18pt", fontStyle: "Bold", appliedFont: "Arial", name: "StyleDailyHeader" });
     myDocument.paragraphStyles.add({ name: "StyleDailyBody", pointSize: 10, });
 }
 catch (Error) { }
@@ -49,16 +50,7 @@ with (myDocument) {
     with (pages[-1]) {
         appliedMaster = app.activeDocument.masterSpreads.item("A-Musterseite");
     }
-    //if (myDocument.pages[-1].textFrames.length < 1) {
-    //  myTextFrame = myDocument.pages.item(-1).textFrames.add();
-    //}
-    //else {
-
     myTextFrame = myDocument.pages.item(-1).textFrames[0];
-    //}
-    //myTextFrame.geometricBounds = ["10mm", "10mm", "200mm", "280mm"];
-    //myTextFrame.textFramePreferences.textColumnCount = 3;
-    //myTextFrame.textFramePreferences.autoSizingType = AutoSizingTypeEnum.HEIGHT_AND_WIDTH
     for (var i = 0; i < foldercontent.length; i++) {
         var file = new File(foldercontent[i]);
         if (file.open()) {
@@ -120,13 +112,13 @@ with (myDocument) {
                     if (img[0].geometricBounds[3] - img[0].geometricBounds[1] > img[0].geometricBounds[2] - img[0].geometricBounds[0]) {
                         //Landscape image
                         var h = (img[0].geometricBounds[2] - img[0].geometricBounds[0]) / (img[0].geometricBounds[3] - img[0].geometricBounds[1]) * myDocument.pages[-1].textFrames[0].textFramePreferences.textColumnFixedWidth;
-                        var myTopLeft = rect.resolve(AnchorPoint.TOP_LEFT_ANCHOR, CoordinateSpaces.INNER_COORDINATES)[0];
-                        var myBottomRight = rect.resolve(AnchorPoint.BOTTOM_RIGHT_ANCHOR, CoordinateSpaces.INNER_COORDINATES)[0];
-                        var x0 = myTopLeft[0];
-                        var y0 = myTopLeft[1];
-                        var x1 = myBottomRight[0];
-                        var y1 = myBottomRight[1] + h;
-                        rect.reframe(CoordinateSpaces.INNER_COORDINATES, [[x0, y0], [x1, y1]]);
+
+                        var x0 = rect.geometricBounds[1];
+                        var y0 = rect.geometricBounds[0];
+                        var x1 = rect.geometricBounds[3];
+                        var y1 = y0+h;
+                        rect.geometricBounds = [y0, x0, y1, x1];
+
                         rect.fit(FitOptions.FILL_PROPORTIONALLY);
                     }
 
