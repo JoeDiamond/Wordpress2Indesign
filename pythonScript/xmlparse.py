@@ -100,23 +100,40 @@ def get_posts(xmlfile):
             targetThumbPath = "./imgs/" + \
                 os.path.splitext(tail)[0] + "_thumb.jpg"
             #print(targetThumbPath + "\r")
-            if not os.path.isfile(targetPath):
+            # If there is no thumbnail and the original isn't there, download it
+            if not os.path.isfile(targetThumbPath) and not os.path.isfile(targetPath):
                 try:
                     print(imgl[1] + ": ")
                     wget.download(imgl[1], targetPath)
                 except:
                     print("Error downloading\r")
                     errorfile.write(post.post_date.strftime(
-                        "%Y-%m-%d_%H-%M-%S") + ": " + imgl[1]+"\r")
+                        "%Y-%m-%d_%H-%M-%S") + "\t" + post.title + "\t" + imgl[1]+"\r")
                 print("\r")
             if not os.path.isfile(targetThumbPath) and os.path.isfile(targetPath):
                 im = Image.open(targetPath)
                 # Handle the sporadic gif
                 if(os.path.splitext(targetPath) is "gif" and im.is_animated):
+                    print("Image is a gif")
                     im.seek(0)
                 im.convert('RGB')
                 im.thumbnail((1200, 1200), Image.ANTIALIAS)
-                im.save(targetThumbPath, 'JPEG', quality=80)
+                try:
+                    im.save(targetThumbPath, 'JPEG', quality=80)
+                except:
+                    print("Error saving file\r")
+                    errorfile.write(post.post_date.strftime(
+                        "%Y-%m-%d_%H-%M-%S") + "\t" + post.title +"\t" + imgl[1]+"\r")
+            # delete the original
+            if os.path.isfile(targetPath):
+                for i in range(3):
+                    try:
+                        os.remove(targetPath)
+                    except:
+                        print("Error deleting: " + targetPath)
+                        time.sleep(1)
+                        continue
+                    break
 
         # print(post.links)
         post.body = remove_tags(post.body, post.links)
@@ -132,7 +149,7 @@ def get_posts(xmlfile):
 
 # run when called from command line
 posts = get_posts(
-    'C:\\Users\\Joe\\Downloads\\luegmairblog.wordpress.2019-06-26(3).xml')
+    'C:\\Users\\Joe\\Downloads\\luegmairblog.wordpress.2019-07-01.xml')
 
 for post in posts:
     # print("==================")
