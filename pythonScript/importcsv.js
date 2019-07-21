@@ -40,8 +40,9 @@ var foldercontent = csvfolder.getFiles("*.csv");
 
 // Define the paragraph styles
 try {
-    myDocument.paragraphStyles.add({ spaceBefore: "5mm", spaceAfter: "2mm", pointSize: "18pt", fontStyle: "Bold", appliedFont: "Arial", name: "StyleDailyHeader" });
+    myDocument.paragraphStyles.add({ spaceAfter: "2mm", pointSize: "18pt", fontStyle: "Bold", appliedFont: "Arial", name: "StyleDailyHeader" });
     myDocument.paragraphStyles.add({ name: "StyleDailyBody", pointSize: 10, });
+    myDocument.paragraphStyles.add({ name: "StyleDailyDate", spaceBefore: "5mm", pointSize: 8, });
 }
 catch (Error) { }
 
@@ -57,6 +58,11 @@ with (myDocument) {
             var s = file.read();
             var values = s.split("|");
             file.close()
+            var datetime = values[0].split ("_");
+            var date = datetime[0].split ("-");
+            var postDate = new Date(date[0],date[1],date[2]);
+            myDocument.stories[-1].insertionPoints.item(-1).contents = postDate.getDate()+ "." + (postDate.getMonth()+1) +"." + postDate.getFullYear()+ "\r";
+            myDocument.stories[-1].paragraphs[-1].appliedParagraphStyle = "StyleDailyDate";
             myDocument.stories[-1].insertionPoints.item(-1).contents = values[1] + "\r";
             myDocument.stories[-1].paragraphs[-1].appliedParagraphStyle = "StyleDailyHeader";
             myDocument.stories[-1].insertionPoints.item(-1).contents = values[2] + "\r";

@@ -149,7 +149,7 @@ def get_posts(xmlfile):
 
 # run when called from command line
 posts = get_posts(
-    'C:\\Users\\Joe\\Downloads\\luegmairblog.wordpress.2019-07-01.xml')
+    'C:\\Users\\Joe\\Downloads\\luegmairblog.wordpress.2019-07-21.xml')
 
 for post in posts:
     # print("==================")
