@@ -87,13 +87,15 @@ with (myDocument) {
                 if (myFoundItems.length != 0) {
                     // Trim to get the filename
                     linkname = myFoundItems[0].contents.substring(2, myFoundItems[0].contents.length - 6)
+                    // Get the orientation of the image (this is not yet necessary for anything)
                     orientation = myFoundItems[0].contents.substring(myFoundItems[0].contents.length - 5, myFoundItems[0].contents.length - 4)
+                    // The image size in s(ingle) and d(ouble), indicating how the image should be handled. Double indicating that two images should be placed nect to each other
                     imagesize = myFoundItems[0].contents.substring(myFoundItems[0].contents.length - 3, myFoundItems[0].contents.length - 2)
                     widthfactor = 1
                     if (imagesize == "d")
                     {
                         widthfactor = 2
-                        }
+                    }
                     
                     var ErrorOccurred = false;
                     try {
