@@ -78,16 +78,30 @@ with (myDocument) {
 
             //Find the tags (since this is a JavaScript string, 
             //the backslashes must be escaped).
-            app.findGrepPreferences.findWhat = "\\\[\\\[.+\\\]\\\]";
+            // The question mark after the plus makes the search non-greedy, which is important when looking for the double angular brackets
+            app.findGrepPreferences.findWhat = "\\\[\\\[.+?,[pl],[sd]\\\]\\\]";
+
+            //Iterate until nothing more is found
             while (true) {
                 var myFoundItems = myDocument.findGrep();
                 if (myFoundItems.length != 0) {
                     // Trim to get the filename
-                    linkname = myFoundItems[0].contents.substring(2, myFoundItems[0].contents.length - 2)
+                    linkname = myFoundItems[0].contents.substring(2, myFoundItems[0].contents.length - 6)
+                    orientation = myFoundItems[0].contents.substring(myFoundItems[0].contents.length - 5, myFoundItems[0].contents.length - 4)
+                    imagesize = myFoundItems[0].contents.substring(myFoundItems[0].contents.length - 3, myFoundItems[0].contents.length - 2)
+                    widthfactor = 1
+                    if (imagesize == "d")
+                    {
+                        widthfactor = 2
+                        }
+                    
                     var ErrorOccurred = false;
                     try {
+                        
                         // Create a new rectangle to place the image in
-                        var rect = myFoundItems[0].insertionPoints[0].rectangles.add({ geometricBounds: [0, 0, 40, myTextFrame.textFramePreferences.textColumnFixedWidth], strokeWeight: 0 });
+                        var rect = myFoundItems[0].insertionPoints[0].rectangles.add(
+                        { geometricBounds: [0, 0, 40, myTextFrame.textFramePreferences.textColumnFixedWidth/widthfactor], 
+                            strokeWeight: 0 });
                     }
                     catch (Error) {
                         ErrorOccurred = true;
@@ -95,7 +109,9 @@ with (myDocument) {
                     if (ErrorOccurred) {
                         myDocument.pages.add();
                         myDocument.pages[-2].textFrames[0].nextTextFrame = myDocument.pages[-1].textFrames[0];
-                        rect = myFoundItems[0].insertionPoints[0].rectangles.add({ geometricBounds: [0, 0, 40, myTextFrame.textFramePreferences.textColumnFixedWidth], strokeWeight: 0 });
+                        rect = myFoundItems[0].insertionPoints[0].rectangles.add(
+                        { geometricBounds: [0, 0, 40, myTextFrame.textFramePreferences.textColumnFixedWidth/widthfactor], 
+                            strokeWeight: 0 });
                     }
                     // Check if the text frame has overflown
                     addAndLinkPageAndFrame(myDocument);

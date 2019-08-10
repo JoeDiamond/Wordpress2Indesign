@@ -65,9 +65,33 @@ def remove_tags(text, links):
             searchText = "<img.*"+re.escape(l[1])+".*>"
         # print(searchText)
         head, tail = os.path.split(l[1])
+
+        targetThumbPath = "./imgs/" + \
+            os.path.splitext(tail)[0] + "_thumb.jpg"
+        im = Image.open(targetThumbPath)
         # print(tail)
-        text = re.sub(searchText, "[[" + tail + "]]", text)
+        # Set the image and give it the details for layout (portrait/landscape, single image)
+        width, height = im.size
+        if (width>height):
+            text = re.sub(searchText, "[[" + tail + ",l,s]]", text)
+        else:
+            text = re.sub(searchText, "[[" + tail + ",p,s]]", text)
+
+    # Now it's time to check for images that are portrait and can be pulled together
+    # No more than 100 characters apart
+    # The double portrait images are fitted into a specific tag/bracket
+    text = re.sub("(\[\[.{10,30},p,s\]\])([\s\S]{0,100})(\[\[.{10,30},p,s\]\])",
+                 # "\g<1>\g<3>\g<2>", text, flags=re.DOTALL)
+                  dashrepl, text, flags=re.DOTALL)
+
+    # Remove multiple line breaks
+    text = re.sub("(\s{2,10})",
+                  "\r", text)
     return text
+
+
+def dashrepl(matchobj):
+    return matchobj.group(1).replace(",s", ",d") + matchobj.group(3).replace(",s", ",d") + matchobj.group(2)
 
 
 def get_posts(xmlfile):
@@ -149,7 +173,7 @@ def get_posts(xmlfile):
 
 # run when called from command line
 posts = get_posts(
-    'C:\\Users\\Joe\\Downloads\\luegmairblog.wordpress.2019-07-21.xml')
+    'C:\\Users\\Joe\\Downloads\\luegmairblog.wordpress.2019-08-10.xml')
 
 for post in posts:
     # print("==================")
