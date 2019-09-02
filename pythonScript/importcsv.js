@@ -92,7 +92,7 @@ with (myDocument) {
                     // The image size in s(ingle) and d(ouble), indicating how the image should be handled. Double indicating that two images should be placed nect to each other
                     imagesize = myFoundItems[0].contents.substring(myFoundItems[0].contents.length - 3, myFoundItems[0].contents.length - 2)
                     widthfactor = 1
-                    if (imagesize == "d")
+                    if (orientation == "p")
                     {
                         widthfactor = 2
                     }
@@ -103,7 +103,7 @@ with (myDocument) {
                         // Create a new rectangle to place the image in
                         var rect = myFoundItems[0].insertionPoints[0].rectangles.add(
                         { geometricBounds: [0, 0, 40, myTextFrame.textFramePreferences.textColumnFixedWidth/widthfactor], 
-                            strokeWeight: 0 });
+                            strokeWeight: 0});
                     }
                     catch (Error) {
                         ErrorOccurred = true;
@@ -145,7 +145,13 @@ with (myDocument) {
 
                         rect.fit(FitOptions.FILL_PROPORTIONALLY);
                     }
-
+                
+                                    if (orientation == "p" && imagesize == "s")
+                    {
+                    rect.anchoredObjectSettings.anchoredPosition = AnchorPosition.ANCHORED;
+                    rect.anchoredObjectSettings.anchorPoint = AnchorPoint.TOP_LEFT_ANCHOR;
+                    rect.textWrapPreferences.textWrapMode = TextWrapModes.BOUNDING_BOX_TEXT_WRAP;
+}
                     // Delete the found link
                     myFoundItems[0].remove()
 
