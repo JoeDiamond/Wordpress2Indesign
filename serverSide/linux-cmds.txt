@@ -1,2 +1,0 @@
-sudo chmod --reference=./2013/12 ./2014/10
-sudo chown --reference=/volume1/web/wordpress/wp-content/uploads/2013/12/wpid-20131228_111823.jpg /volume1/web/wordpress/wp-content/uploads/2014/10/*
